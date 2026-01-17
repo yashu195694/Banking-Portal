@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Transfer & History</title>
+    <style>
+        :root { --primary: #2c3e50; --success: #27ae60; --light-bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--light-bg); display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { color: var(--primary); text-align: center; margin-bottom: 20px; }
+        
+        /* Form Styling */
+        .section { margin-bottom: 25px; padding-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        button:hover { background-color: #219150; }
+
+        /* Balance & History Styling */
+        .balance-display { background: #e8f4fd; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e4f5; }
+        #balance-amount { font-size: 2rem; font-weight: 800; color: #2980b9; }
+        
+        .history-section { margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th { background-color: #f8f9fa; color: #777; text-align: left; padding: 10px; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #eee; color: #333; }
+        .empty-msg { text-align: center; color: #999; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-section">
+        <h2>Secure Login</h2>
+        <label>Account ID</label>
+        <input type="text" id="username" placeholder="e.g. User_123">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+        <button onclick="login()">Access Account</button>
+    </div>
+
+    <div id="main-dashboard" style="display:none;">
+        <h2>Dashboard</h2>
+        
+        <div class="balance-display">
+            <small>Remaining Balance</small>
+            <div id="balance-amount">$5,000.00</div>
+        </div>
+
+        <div class="section">
+            <label>Received Account (Recipient)</label>
+            <input type="text" id="target-account" placeholder="Enter recipient account number">
+            
+            <label>Amount to Send ($)</label>
+            <input type="number" id="send-amount" placeholder="0.00">
+            
+            <button onclick="processTransfer()">Send Money Now</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Transaction History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr id="no-data"><td colspan="3" class="empty-msg">No transactions yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBalance = 5000.00;
+
+    function login() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
+    }
+
+    function processTransfer() {
+        const targetAcc = document.getElementById('target-account').value;
+        const amount = parseFloat(document.getElementById('send-amount').value);
+        const historyBody = document.getElementById('history-body');
+        const noDataRow = document.getElementById('no-data');
+
+        // Validation
+        if (!targetAcc || isNaN(amount) || amount <= 0) {
+            alert("Please provide a valid account number and amount.");
+            return;
+        }
+        if (amount > currentBalance) {
+            alert("Insufficient funds for this transaction.");
+            return;
+        }
+
+        // 1. Deduct Balance
+        currentBalance -= amount;
+        document.getElementById('balance-amount').innerText = "$" + currentBalance.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        // 2. Remove "No transactions" message on first entry
+        if (noDataRow) noDataRow.remove();
+
+        // 3. Add to History Table
+        const newRow = historyBody.insertRow(0); // Add to the top
+        newRow.innerHTML = `
+            <td>${targetAcc}</td>
+            <td style="color: #e74c3c; font-weight:bold;">-$${amount.toFixed(2)}</td>
+            <td style="color: #27ae60;">Completed</td>
+        `;
+
+        // Clear Inputs
+        document.getElementById('target-account').value = "";
+        document.getElementById('send-amount').value = "";
+    }
+</script>
+
+</body>
+</html>
