@@ -1,0 +1,89 @@
+<div class="container">
+    <div id="login-section">
+        <h2>Secure Login</h2>
+        <label>Account ID</label>
+        <input type="text" id="username" placeholder="e.g. User_123">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+        <button onclick="login()">Access Account</button>
+    </div>
+
+    <div id="main-dashboard" style="display:none;">
+        <h2>Dashboard</h2>
+        
+        <div class="balance-display">
+            <small>Remaining Balance</small>
+            <div id="balance-amount">$5,000.00</div>
+        </div>
+
+        <div class="section">
+            <label>Received Account (Recipient)</label>
+            <input type="text" id="target-account" placeholder="Enter recipient account number">
+            
+            <label>Amount to Send ($)</label>
+            <input type="number" id="send-amount" placeholder="0.00">
+            
+            <button onclick="processTransfer()">Send Money Now</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Transaction History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr id="no-data"><td colspan="3" class="empty-msg">No transactions yet</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBalance = 5000.00;
+
+    function login() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
+    }
+
+    function processTransfer() {
+        const targetAcc = document.getElementById('target-account').value;
+        const amount = parseFloat(document.getElementById('send-amount').value);
+        const historyBody = document.getElementById('history-body');
+        const noDataRow = document.getElementById('no-data');
+
+        // Validation
+        if (!targetAcc || isNaN(amount) || amount <= 0) {
+            alert("Please provide a valid account number and amount.");
+            return;
+        }
+        if (amount > currentBalance) {
+            alert("Insufficient funds for this transaction.");
+            return;
+        }
+
+        // 1. Deduct Balance
+        currentBalance -= amount;
+        document.getElementById('balance-amount').innerText = "$" + currentBalance.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+        // 2. Remove "No transactions" message on first entry
+        if (noDataRow) noDataRow.remove();
+
+        // 3. Add to History Table
+        const newRow = historyBody.insertRow(0); // Add to the top
+        newRow.innerHTML = `
+            <td>${targetAcc}</td>
+            <td style="color: #e74c3c; font-weight:bold;">-$${amount.toFixed(2)}</td>
+            <td style="color: #27ae60;">Completed</td>
+        `;
+
+        // Clear Inputs
+        document.getElementById('target-account').value = "";
+        document.getElementById('send-amount').value = "";
+    }
